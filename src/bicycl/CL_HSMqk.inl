@@ -984,15 +984,15 @@ bool CL_HSMqk_ZKAoK::Proof::verify (const CL_HSMqk_ZKAoK &C,
 
   /* Check that pk is a form in G */
   ret &= pk.elt().discriminant() == C.Cl_G().discriminant();
-  ret &= C.genus (pk.elt()) == typename CL_HSMqk::Genus ({ 1, 1 });
+  ret &= C.genus (pk.elt()) == CL_HSMqk::Genus ({ 1, 1 });
 
   /* Check that c1 is a form in G */
   ret &= c.c1().discriminant() == C.Cl_G().discriminant();
-  ret &= C.genus (c.c1()) == typename CL_HSMqk::Genus ({ 1, 1 });
+  ret &= C.genus (c.c1()) == CL_HSMqk::Genus ({ 1, 1 });
 
   /* Check that c2 */
   ret &= c.c2().discriminant() == C.Cl_Delta().discriminant();
-  ret &= C.genus (c.c2()) == typename CL_HSMqk::Genus ({ 1, 1 });
+  ret &= C.genus (c.c2()) == CL_HSMqk::Genus ({ 1, 1 });
 
   /* Check u1 bound */
   Mpz B (C.bound_extra_);
