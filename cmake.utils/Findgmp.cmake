@@ -35,8 +35,8 @@ include (FindPackageHandleStandardArgs)
 find_package_handle_standard_args (gmp DEFAULT_MSG GMP_LIBRARY GMP_CPP_LIBRARY GMP_INC_DIR)
 
 if (GMP_FOUND)
-	set (GMP_LIBRARIES ${GMP_LIBRARY})
-	set (GMP_INCLUDE_DIRS "${GMP_INC_DIR}")
+  set (GMP_LIBRARIES ${GMP_LIBRARY})
+  set (GMP_INCLUDE_DIRS "${GMP_INC_DIR}")
   mark_as_advanced (GMP_DIR)
   if (NOT TARGET gmp::gmp)
     # For now we make the target global, because this file is included from a
