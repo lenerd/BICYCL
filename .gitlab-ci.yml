@@ -1,9 +1,3 @@
-sage:
-  image: computop/sage:9.3
-  stage: test
-  script:
-    - sage -t --timeout 600 sage/
-
 C:
   image: $CI_REGISTRY/devtools/images/buildtools
   stage: test
@@ -13,7 +7,7 @@ C:
     - cd build
     - cmake -DWITH_THREADS=${THREADS} ..
     - make
-    - make check
+    - make check ARGS="--verbose"
     - make benchs_build
   parallel:
     matrix:
