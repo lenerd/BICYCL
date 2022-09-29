@@ -455,8 +455,17 @@ inline
 void CL_HSM2k::from_Cl_DeltaK_to_Cl_Delta (QFI &f) const
 {
   f.lift_2exp (k_+1);
+  int chi_m4 = (f.a().mod4() == 3 || f.c().mod4() == 3) ? -1 : 1;
   raise_to_power_M (Cl_Delta(), f);
-  Cl_Delta().nudupl (f, f); // FIXME needed to make compact variant work !!
+  if (chi_m4 == -1)
+  {
+    Mpz t(DeltaK());
+    Mpz::mulby2k (t, t, 2*(k_-1));
+    Mpz::sub (t, t, 1UL);
+    t.neg();
+    QFI g (4UL, 4UL, t);
+    Cl_Delta().nucomp (f, f, g);
+  }
 }
 
 /* */
