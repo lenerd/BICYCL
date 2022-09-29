@@ -55,7 +55,7 @@ void JoyeLibert_benchs_encrypt (const Cryptosystem &C, RandGen &randgen,
   auto encrypt = [&C, &pk, &m, &r] () {C.encrypt (pk, m, r);};
   Bench::one_function<ms, ms> (encrypt, niter, "encrypt", pre);
 
-  auto decrypt = [&C, &pk, &sk, &c] () {C.decrypt (sk, c);};
+  auto decrypt = [&C, &sk, &c] () {C.decrypt (sk, c);};
   Bench::one_function<ms, ms> (decrypt, niter, "decrypt", pre);
 }
 
