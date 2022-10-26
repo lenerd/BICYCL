@@ -2,7 +2,7 @@
 
 ## Download
 
-The code source is available at https://gite.lirmm.fr/eco/cl.
+The code source is available at https://gite.lirmm.fr/crypto/bicycl.
 
 ## Build from source
 
