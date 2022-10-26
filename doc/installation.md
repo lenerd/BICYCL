@@ -31,22 +31,23 @@ the build:
 
   - `CMAKE_INSTALL_PREFIX`: a path to the desired install directory (default
     install directory is chosen by CMake). For example,
-    ```
-    cmake -DCMAKE_INSTALL_PREFIX=/alternative/install/path ..
-    ```
-  
+
+        cmake -DCMAKE_INSTALL_PREFIX=/alternative/install/path ..
+
   - `WITH_THREADS`: a boolean to specify whether or not to use multithread code
     (default is ON). For example, 
-    ```
-    cmake -DWITH_THREADS=OFF ..
-    ```
+
+        cmake -DWITH_THREADS=OFF ..
+
   - `GMP_DIR`: a path to help CMake find the GMP library.
+
+        cmake -DGMP_DIR=/path/to/gmp ..
 
   - `OPENSSL_ROOT_DIR`: a path to help CMake find the OpenSSL library. For,
     example,
-    ```
-    cmake -DOPENSSL_ROOT_DIR=/path/to/openssl ..
-    ```
+
+        cmake -DOPENSSL_ROOT_DIR=/path/to/openssl ..
+
 
 ## Installation
 
