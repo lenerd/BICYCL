@@ -500,7 +500,7 @@ Mpz::operator long int () const
   if (!mpz_fits_sint_p (mpz_))
     throw std::runtime_error ("mpz value could not be parsed as an long int");
   else
-    return mpz_get_ui (mpz_);
+    return mpz_get_si (mpz_);
 }
 
 /* */
