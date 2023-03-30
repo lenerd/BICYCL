@@ -28,6 +28,8 @@
 #include <algorithm>
 #include <vector>
 
+#include <openssl/bn.h>
+
 namespace BICYCL
 {
   namespace _gmp_impl
@@ -101,6 +103,7 @@ namespace BICYCL
       Mpz & operator= (long);
       Mpz & operator= (const std::string &);
       Mpz & operator= (mpf_srcptr); /* only needed once in ClassGroup */
+      Mpz & operator= (const BIGNUM *);
 
       /* comparison */
       bool operator== (const Mpz &) const;

@@ -352,6 +352,25 @@ Mpz & Mpz::operator= (const std::string &s)
 
 /* */
 inline
+Mpz & Mpz::operator= (const BIGNUM *bn)
+{
+  int nbytes = BN_num_bytes (bn);
+  unsigned char *tmp = (unsigned char *) OPENSSL_malloc (nbytes);
+  if (tmp == NULL)
+    throw std::runtime_error ("could not allocate temporary buffer");
+
+  BN_bn2lebinpad (bn, tmp, nbytes);
+  mpz_import (mpz_, nbytes, -1, 1, 0, 0, tmp);
+
+  if (BN_is_negative (bn))
+    neg();
+
+  OPENSSL_free (tmp);
+  return *this;
+}
+
+/* */
+inline
 bool Mpz::operator== (const Mpz &other) const
 {
   return richcmp (*this, other) == 0;

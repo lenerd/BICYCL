@@ -18,6 +18,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <cstring>
+
 #include "bicycl.hpp"
 #include "internals.hpp"
 
@@ -217,6 +219,41 @@ test_JSF (RandGen &randgen)
   return ret;
 }
 
+bool
+test_assignment_from_bignum (RandGen &randgen)
+{
+  bool ret = true;
+
+  Mpz v;
+
+  BIGNUM *bn = BN_new();
+  if (bn == NULL)
+    throw std::runtime_error ("could not allocate OpenSSL BIGNUM");
+
+  for (int n = 10; n < 500; n+=3)
+  {
+    for (int i = 0; i < 25; i++)
+    {
+      BN_pseudo_rand (bn, n, BN_RAND_TOP_ANY, BN_RAND_BOTTOM_ANY);
+      if (randgen.random_bool ())
+        BN_set_negative (bn, 1);
+
+      v = bn;
+      char *bn_str = BN_bn2dec (bn);
+      char *v_str = mpz_get_str (NULL, 10, v);
+
+      ret &= strcmp (bn_str, v_str) == 0;
+
+      OPENSSL_free (bn_str);
+      free (v_str);
+    }
+  }
+
+  BN_free (bn);
+
+  return ret;
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -236,6 +273,7 @@ main (int argc, char *argv[])
   RUN_TEST_AND_PRINT_RESULT_LINE (test_mpz_sqrt_mod_prime, randgen);
   RUN_TEST_AND_PRINT_RESULT_LINE (test_mpz_partial_euclid_scratch, randgen);
   RUN_TEST_AND_PRINT_RESULT_LINE (test_JSF, randgen);
+  RUN_TEST_AND_PRINT_RESULT_LINE (test_assignment_from_bignum, randgen);
 
   return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }
