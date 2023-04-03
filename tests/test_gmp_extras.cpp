@@ -254,6 +254,35 @@ test_assignment_from_bignum (RandGen &randgen)
   return ret;
 }
 
+bool
+test_convert_to_bignum (RandGen &randgen)
+{
+  bool ret = true;
+
+  for (int n = 10; n < 500; n+=3)
+  {
+    for (int i = 0; i < 25; i++)
+    {
+      Mpz v (randgen.random_mpz_2exp (n));
+      if (randgen.random_bool ())
+        v.neg ();
+
+      BIGNUM *bn = v;
+
+      char *bn_str = BN_bn2dec (bn);
+      char *v_str = mpz_get_str (NULL, 10, v);
+
+      ret &= strcmp (bn_str, v_str) == 0;
+
+      OPENSSL_free (bn_str);
+      BN_free (bn);
+      free (v_str);
+    }
+  }
+
+  return ret;
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -274,6 +303,7 @@ main (int argc, char *argv[])
   RUN_TEST_AND_PRINT_RESULT_LINE (test_mpz_partial_euclid_scratch, randgen);
   RUN_TEST_AND_PRINT_RESULT_LINE (test_JSF, randgen);
   RUN_TEST_AND_PRINT_RESULT_LINE (test_assignment_from_bignum, randgen);
+  RUN_TEST_AND_PRINT_RESULT_LINE (test_convert_to_bignum, randgen);
 
   return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -129,6 +129,7 @@ namespace BICYCL
       operator mpz_srcptr() const;
       operator unsigned long int() const;
       operator long int() const;
+      operator BIGNUM *() const;
 
       /* getters */
       /* */

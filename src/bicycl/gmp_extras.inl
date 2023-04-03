@@ -355,17 +355,23 @@ inline
 Mpz & Mpz::operator= (const BIGNUM *bn)
 {
   int nbytes = BN_num_bytes (bn);
-  unsigned char *tmp = (unsigned char *) OPENSSL_malloc (nbytes);
-  if (tmp == NULL)
-    throw std::runtime_error ("could not allocate temporary buffer");
+  if (nbytes > 0)
+  {
+    unsigned char *tmp = (unsigned char *) OPENSSL_malloc (nbytes);
+    if (tmp == NULL)
+      throw std::runtime_error ("could not allocate temporary buffer");
 
-  BN_bn2lebinpad (bn, tmp, nbytes);
-  mpz_import (mpz_, nbytes, -1, 1, 0, 0, tmp);
+    BN_bn2lebinpad (bn, tmp, nbytes);
+    mpz_import (mpz_, nbytes, -1, 1, 0, 0, tmp);
 
-  if (BN_is_negative (bn))
-    neg();
+    if (BN_is_negative (bn))
+      neg();
 
-  OPENSSL_free (tmp);
+    OPENSSL_free (tmp);
+  }
+  else
+    *this = 0UL;
+
   return *this;
 }
 
@@ -520,6 +526,22 @@ Mpz::operator long int () const
     throw std::runtime_error ("mpz value could not be parsed as an long int");
   else
     return mpz_get_si (mpz_);
+}
+
+/* */
+inline
+Mpz::operator BIGNUM *() const
+{
+  size_t len;
+  unsigned char * tmp =
+                  (unsigned char *) mpz_export (NULL, &len, -1, 1, 0, 0, mpz_);
+  BIGNUM *ret = BN_lebin2bn (tmp, len, NULL);
+
+  if (mpz_sgn (mpz_) < 0)
+    BN_set_negative (ret, 1);
+
+  free (tmp);
+  return ret;
 }
 
 /* */
