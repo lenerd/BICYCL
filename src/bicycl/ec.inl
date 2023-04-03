@@ -187,7 +187,7 @@ Mpz ECDSA::hash_message (const Message &m) const
   ret = EVP_DigestFinal_ex (mdctx_, digest.data(), NULL);
 
   size_t Ln = std::min ((size_t) EVP_MD_size (md_) * CHAR_BIT, order().nbits());
-  return Mpz (digest, Ln); // TODO do the same for ZKAoK
+  return Mpz (digest, Ln);
 }
 
 /* */

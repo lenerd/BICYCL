@@ -1044,7 +1044,7 @@ Mpz CL_HSMqk_ZKAoK::Proof::k_from_hash (const CL_HSMqk_ZKAoK &C,
   if (ctx == NULL)
     throw std::runtime_error ("EVP_MD_CTX_create failed");
 
-  ret = EVP_DigestInit (ctx, md);
+  ret = EVP_DigestInit_ex (ctx, md, NULL);
   if (ret != 1)
     throw std::runtime_error ("EVP_DigestInit failed");
 
@@ -1062,9 +1062,7 @@ Mpz CL_HSMqk_ZKAoK::Proof::k_from_hash (const CL_HSMqk_ZKAoK &C,
 
   EVP_MD_CTX_free (ctx);
 
-  Mpz t(digest.data(), nbytes);
-  Mpz::mod2k (t, t, C.C_exp2_);
-  return t;
+  return Mpz (digest, C.C_exp2_);
 }
 
 /* */
