@@ -91,7 +91,7 @@ namespace BICYCL
       Mpz (unsigned long);
       Mpz (long);
       Mpz (const std::string &);
-      Mpz (const unsigned char *, size_t);
+      Mpz (const std::vector<unsigned char> &, size_t);
 
       /* destructor */
       ~Mpz ();
@@ -251,6 +251,7 @@ namespace BICYCL
       Mpz random_mpz (const Mpz &);
       Mpz random_mpz_2exp (mp_bitcnt_t);
 
+      unsigned char random_uchar ();
       unsigned long random_ui (unsigned long);
       unsigned long random_ui_2exp (mp_bitcnt_t);
 

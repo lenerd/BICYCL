@@ -13,6 +13,7 @@ set (TESTS_LIST test_gmp_extras
                 test_CL_HSM2k
                 test_Paillier
                 test_Joye_Libert
+                test_ECDSA
                 )
 
 ### Automatically create target and test from TESTS_LIST

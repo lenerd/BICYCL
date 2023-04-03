@@ -286,10 +286,15 @@ Mpz::Mpz (const std::string &s)
 
 /* */
 inline
-Mpz::Mpz (const unsigned char *data, size_t length) : Mpz()
+Mpz::Mpz (const std::vector<unsigned char> &data, size_t nb_bits) : Mpz()
 {
-  mpz_import (mpz_, length, -1, 1, -1, 0, data);
-
+  /* the binary data is interpreted most significant bit first */
+  mpz_import (mpz_, data.size(), 1, 1, 0, 0, data.data());
+  size_t ln2 = nbits();
+  if (nb_bits > data.size() * CHAR_BIT)
+    throw std::runtime_error ("not enough data to read the number of bits");
+  else
+    divby2k (*this, *this, ln2-nb_bits);
 }
 
 /* */
@@ -1484,6 +1489,13 @@ Mpz RandGen::random_mpz_2exp (mp_bitcnt_t n)
   Mpz r;
   mpz_urandomb (r.mpz_, rand_, n);
   return r;
+}
+
+/* */
+inline
+unsigned char RandGen::random_uchar ()
+{
+  return gmp_urandomb_ui (rand_, CHAR_BIT);
 }
 
 /* */

@@ -18,20 +18,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef BICYCL_HPP__
-#define BICYCL_HPP__
+#include <string>
+#include <sstream>
 
-#ifndef BICYCL_GMP_PRIMALITY_TESTS_ITERATION
-#define BICYCL_GMP_PRIMALITY_TESTS_ITERATION 30
-#endif
+#include "bicycl.hpp"
+#include "internals.hpp"
 
-#include "bicycl/gmp_extras.hpp"
-#include "bicycl/qfi.hpp"
-#include "bicycl/seclevel.hpp"
-#include "bicycl/ec.hpp"
-#include "bicycl/CL_HSMqk.hpp"
-#include "bicycl/CL_HSM2k.hpp"
-#include "bicycl/Paillier.hpp"
-#include "bicycl/Joye_Libert.hpp"
+using std::string;
 
-#endif /* BICYCL_HPP__ */
+using namespace BICYCL;
+
+/******************************************************************************/
+bool check (RandGen &randgen, SecLevel seclevel, size_t niter)
+{
+  bool success = true;
+
+  std::stringstream desc;
+  desc << "security " << seclevel << " bits";
+
+  ECDSA C (seclevel);
+  desc << " ECDSA";
+  success &= Test::test_sign (C, randgen, niter, desc.str());
+
+  return success;
+}
+
+/******************************************************************************/
+int
+main (int argc, char *argv[])
+{
+  bool success = true;
+
+  RandGen randgen;
+  randseed_from_argv (randgen, argc, argv);
+
+  success &= check (randgen, SecLevel::_112, 50);
+  success &= check (randgen, SecLevel::_128, 50);
+  success &= check (randgen, SecLevel::_192, 50);
+  success &= check (randgen, SecLevel::_256, 50);
+
+  return success ? EXIT_SUCCESS : EXIT_FAILURE;
+}

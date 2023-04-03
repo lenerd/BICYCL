@@ -114,6 +114,37 @@ namespace BICYCL
 
     /* */
     template <class Cryptosystem>
+    bool test_sign (const Cryptosystem &C, RandGen &randgen, size_t niter,
+                    const std::string & pre = std::string(""))
+    {
+      using PublicKey = typename Cryptosystem::PublicKey;
+      using SecretKey = typename Cryptosystem::SecretKey;
+      using Message = typename Cryptosystem::Message;
+      using Signature = typename Cryptosystem::Signature;
+
+      bool ret = true;
+
+      SecretKey sk = C.keygen (randgen);
+      PublicKey pk = C.keygen (sk);
+
+      Message m;
+      auto random_uchar = [&randgen](){ return randgen.random_uchar(); };
+
+      /* Test niter random sign + verif */
+      for (size_t i = 0; i < niter; i++)
+      {
+        m.resize (randgen.random_ui_2exp (8));
+        std::generate (begin(m), end(m), random_uchar);
+        Signature s = C.sign (sk, m, randgen);
+        ret &= C.verif (s, pk, m);
+      }
+
+      Test::result_line (pre + " sign/verif", ret);
+      return ret;
+    }
+
+    /* */
+    template <class Cryptosystem>
     bool test_ciphertext_ops (const Cryptosystem &C, RandGen &randgen,
                               size_t niter,
                               const std::string & pre = std::string(""))

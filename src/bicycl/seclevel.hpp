@@ -26,6 +26,8 @@
 #include <string>
 #include <vector>
 
+#include <openssl/obj_mac.h>
+
 namespace BICYCL
 {
   class InvalidSecLevelException : public std::invalid_argument
@@ -96,6 +98,26 @@ namespace BICYCL
         else if (value_ == _128)   return 1827;
         else if (value_ == _192)   return 3598;
         else if (value_ == _256)   return 5971;
+        else                       throw InvalidSecLevelException();
+      }
+
+      /* */
+      int elliptic_curve_openssl_nid () const
+      {
+        if (value_ == _112)        return NID_secp224r1;
+        else if (value_ == _128)   return NID_X9_62_prime256v1;
+        else if (value_ == _192)   return NID_secp384r1;
+        else if (value_ == _256)   return NID_secp521r1;
+        else                       throw InvalidSecLevelException();
+      }
+
+      /* */
+      int sha3_openssl_nid () const
+      {
+        if (value_ == _112)        return NID_sha3_224;
+        else if (value_ == _128)   return NID_sha3_256;
+        else if (value_ == _192)   return NID_sha3_384;
+        else if (value_ == _256)   return NID_sha3_512;
         else                       throw InvalidSecLevelException();
       }
 
