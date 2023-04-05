@@ -188,6 +188,7 @@ namespace BICYCL
       void nucomp (QFI &, const QFI &, const QFI &) const;
       void nucompinv (QFI &, const QFI &, const QFI &) const;
       void nudupl (QFI &, const QFI &) const;
+      void nudupl (QFI &, const QFI &, size_t) const;
       void nupow (QFI &, const QFI &, const Mpz &) const;
       void nupow (QFI &, const QFI &, const Mpz &, const QFI &,
                   const Mpz &) const;

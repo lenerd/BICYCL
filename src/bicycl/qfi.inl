@@ -1478,6 +1478,20 @@ void ClassGroup::nudupl (QFI &r, const QFI &f) const
   QFI::nudupl (r, f, default_nucomp_bound());
 }
 
+/* */
+inline
+void ClassGroup::nudupl (QFI &r, const QFI &f, size_t niter) const
+{
+  Mpz L = default_nucomp_bound();
+  Mpz t0, t1, t2, t3, t4, t5, t6, t7;
+  if (niter > 0)
+  {
+    QFI::nudupl (r, f, L, t0, t1, t2, t3, t4, t5, t6, t7);
+    for (size_t i = 1; i < niter; i++)
+      QFI::nudupl (r, r, L, t0, t1, t2, t3, t4, t5, t6, t7);
+  }
+}
+
 inline
 void ClassGroup::nupow (QFI &r, const QFI &f, const Mpz &n) const
 {
