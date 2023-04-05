@@ -40,5 +40,3 @@ install (FILES ${BICYCL_MAIN_HEADER}
                           DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install (FILES ${BICYCL_INSTALLABLE_HEADERS_AND_INL}
                           DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/bicycl)
-
-add_subdirectory (bin)
