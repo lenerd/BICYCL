@@ -8,7 +8,7 @@ C:
     - cmake -DWITH_THREADS=${THREADS} ..
     - make
     - make check ARGS="--verbose"
-    - make benchs_build
+    - make benchs_build examples
   parallel:
     matrix:
       - THREADS: "ON"
