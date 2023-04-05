@@ -67,15 +67,8 @@ const EC_GROUP * ECGroup::group () const
 /******************************************************************************/
 /* */
 inline
-ECDSA::ECDSA (SecLevel seclevel) : ec_(seclevel),
-                          md_(EVP_get_digestbynid (seclevel.sha3_openssl_nid()))
+ECDSA::ECDSA (SecLevel seclevel) : ec_(seclevel), H_(seclevel)
 {
-  if (md_ == NULL)
-    throw std::runtime_error ("could not allocate EVP from nid in ECDSA");
-
-  mdctx_ = EVP_MD_CTX_new ();
-  if (mdctx_ == NULL)
-    throw std::runtime_error ("EVP_MD_CTX_new failed in ECDSA");
 }
 
 /* */
@@ -172,22 +165,8 @@ const EC_POINT * ECDSA::PublicKey::ec_point () const
 /* */
 Mpz ECDSA::hash_message (const Message &m) const
 {
-  int ret;
-
-  ret = EVP_DigestInit_ex (mdctx_, md_, NULL);
-  if (ret != 1)
-    throw std::runtime_error ("EVP_DigestInit_ex failed in ECDSA");
-
-  ret = EVP_DigestUpdate (mdctx_, m.data(), m.size());
-
-  if (ret != 1)
-    throw std::runtime_error ("EVP_DigestUpdate failed in ECDSA");
-
-  std::vector<unsigned char> digest (EVP_MD_size (md_));
-  ret = EVP_DigestFinal_ex (mdctx_, digest.data(), NULL);
-
-  size_t Ln = std::min ((size_t) EVP_MD_size (md_) * CHAR_BIT, order().nbits());
-  return Mpz (digest, Ln);
+  size_t Ln = std::min ((size_t) H_.digest_size () * CHAR_BIT, order().nbits());
+  return Mpz (H_(m), Ln);
 }
 
 /* */
@@ -309,13 +288,6 @@ bool ECDSA::verif (const Signature &s, const PublicKey &pk,
   EC_POINT_free (T);
 
   return ok;
-}
-
-/* */
-inline
-ECDSA::~ECDSA ()
-{
-  EVP_MD_CTX_free (mdctx_);
 }
 
 #endif /* EC_INL__ */

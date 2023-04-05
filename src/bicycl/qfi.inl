@@ -1273,6 +1273,14 @@ void QFI::nupow (QFI &r, const QFI &f, const Mpz &n, size_t d, size_t e,
 #undef NUDUPL
 #undef NUCOMP
 
+/* */
+template <>
+void HashAlgo::hash_update (const QFI &f)
+{
+  hash_update (f.a());
+  hash_update (f.b());
+  hash_update (f.c());
+}
 
 /******************************************************************************/
 /* */

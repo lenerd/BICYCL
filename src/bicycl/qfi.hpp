@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <stdexcept>
 
+#include "bicycl/hash.hpp"
 #include "bicycl/gmp_extras.hpp"
 
 namespace BICYCL

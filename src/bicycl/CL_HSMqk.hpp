@@ -25,8 +25,9 @@
 #include <tuple>
 #include <stdexcept>
 
-#include <openssl/evp.h> /* for Shake256 implementation */
+#include <openssl/obj_mac.h> /* for NID_shake128 */
 
+#include "bicycl/hash.hpp"
 #include "bicycl/gmp_extras.hpp"
 #include "bicycl/qfi.hpp"
 #include "bicycl/CL_HSM_utils.hpp"
@@ -276,6 +277,7 @@ namespace BICYCL
     protected:
       size_t C_exp2_; /* Use 2^C_exp2_ as the bound in the ZK proof */
       Mpz bound_extra_;
+      mutable HashAlgo H_;
 
     public:
       using CL_HSMqk::SecretKey;
@@ -309,14 +311,9 @@ namespace BICYCL
                        const CipherText &) const;
 
         protected:
-          template <size_t extra_bits_for_uniformity=40>
           Mpz k_from_hash (const CL_HSMqk_ZKAoK &C, const PublicKey &pk,
                            const CipherText &c, const QFI &t1,
                            const QFI &t2) const;
-          static void update_hash (EVP_MD_CTX *ctx, const Mpz &v);
-          static void update_hash (EVP_MD_CTX *ctx, const QFI &f);
-          static void update_hash (EVP_MD_CTX *ctx, const PublicKey &pk);
-          static void update_hash (EVP_MD_CTX *ctx, const CipherText &c);
       };
 
       /* */

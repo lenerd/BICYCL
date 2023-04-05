@@ -888,12 +888,27 @@ CL_HSMqk::Genus CL_HSMqk::genus (const QFI &f) const
   return { chi_q, chi_p };
 }
 
+/* */
+template <>
+void HashAlgo::hash_update (const CL_HSMqk::PublicKey &pk)
+{
+  hash_update (pk.elt());
+}
+
+/* */
+template <>
+void HashAlgo::hash_update (const CL_HSMqk::CipherText &c)
+{
+  hash_update (c.c1());
+  hash_update (c.c2());
+}
+
 /******************************************************************************/
 /* */
 inline
 CL_HSMqk_ZKAoK::CL_HSMqk_ZKAoK (const CL_HSMqk &cryptosystem, size_t C_exp2,
                                                               const Mpz &t)
-  : CL_HSMqk (cryptosystem), C_exp2_ (C_exp2)
+  : CL_HSMqk (cryptosystem), C_exp2_ (C_exp2), H_ (NID_shake128)
 {
   if (C_exp2_ >= M_.nbits())
     throw std::runtime_error ("the bound C=2^C_exp2 must be smaller than q^k");
@@ -1026,77 +1041,13 @@ bool CL_HSMqk_ZKAoK::Proof::verify (const CL_HSMqk_ZKAoK &C,
 }
 
 /* */
-template <size_t extra_bits_for_uniformity>
 inline
 Mpz CL_HSMqk_ZKAoK::Proof::k_from_hash (const CL_HSMqk_ZKAoK &C,
                                         const PublicKey &pk,
                                         const CipherText &c,
                                         const QFI &t1, const QFI &t2) const
 {
-  int ret;
-  EVP_MD_CTX* ctx = NULL;
-  const EVP_MD* md = NULL;
-  md = EVP_shake128 ();
-  if (md == NULL)
-    throw std::runtime_error ("EVP_shake128 failed");
-
-  ctx = EVP_MD_CTX_new ();
-  if (ctx == NULL)
-    throw std::runtime_error ("EVP_MD_CTX_create failed");
-
-  ret = EVP_DigestInit_ex (ctx, md, NULL);
-  if (ret != 1)
-    throw std::runtime_error ("EVP_DigestInit failed");
-
-  update_hash (ctx, pk);
-  update_hash (ctx, c);
-  update_hash (ctx, t1);
-  update_hash (ctx, t2);
-
-  size_t nbytes = (C.C_exp2_+7)/8;
-  std::vector<unsigned char> digest (nbytes);
-
-  EVP_DigestFinalXOF (ctx, digest.data(), nbytes);
-  if (ret != 1)
-    throw std::runtime_error ("EVP_DigestFinalXOF failed");
-
-  EVP_MD_CTX_free (ctx);
-
-  return Mpz (digest, C.C_exp2_);
-}
-
-/* */
-inline
-void CL_HSMqk_ZKAoK::Proof::update_hash (EVP_MD_CTX *ctx, const Mpz &v)
-{
-  int ret = EVP_DigestUpdate (ctx, mpz_limbs_read (v),
-                                   mpz_size (v) * sizeof (mp_limb_t));
-  if (ret != 1)
-    throw std::runtime_error ("EVP_DigestUpdate failed");
-}
-
-/* */
-inline
-void CL_HSMqk_ZKAoK::Proof::update_hash (EVP_MD_CTX *ctx, const QFI &f)
-{
-  update_hash (ctx, f.a());
-  update_hash (ctx, f.b());
-  update_hash (ctx, f.c());
-}
-
-/* */
-inline
-void CL_HSMqk_ZKAoK::Proof::update_hash (EVP_MD_CTX *ctx, const PublicKey &pk)
-{
-  update_hash (ctx, pk.elt());
-}
-
-/* */
-inline
-void CL_HSMqk_ZKAoK::Proof::update_hash (EVP_MD_CTX *ctx, const CipherText &c)
-{
-  update_hash (ctx, c.c1());
-  update_hash (ctx, c.c2());
+  return Mpz (C.H_ (pk, c, t1, t2), C.C_exp2_);
 }
 
 #endif /* CL_HSM_INL__ */

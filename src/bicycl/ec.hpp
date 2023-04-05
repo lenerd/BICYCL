@@ -57,8 +57,7 @@ namespace BICYCL
   {
     protected:
       ECGroup ec_;
-      const EVP_MD *md_;
-      mutable EVP_MD_CTX *mdctx_;
+      mutable HashAlgo H_;
 
     public:
       /*** Secret Key ***/
@@ -97,7 +96,7 @@ namespace BICYCL
       /*** Message ***/
       using Message = std::vector<unsigned char>;
 
-      /*** Message ***/
+      /*** Signature ***/
       class Signature
       {
         protected:
@@ -125,9 +124,6 @@ namespace BICYCL
       Mpz hash_message (const Message &m) const;
       Signature sign (const SecretKey &sk, const Message &m, RandGen &) const;
       bool verif (const Signature &s, const PublicKey &pk, const Message &m) const;
-
-      /* destructor */
-      ~ECDSA ();
   }; /* ECDSA */
 
   #include "ec.inl"

@@ -30,6 +30,8 @@
 
 #include <openssl/bn.h>
 
+#include "bicycl/hash.hpp"
+
 namespace BICYCL
 {
   namespace _gmp_impl

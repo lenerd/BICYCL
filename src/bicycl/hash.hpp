@@ -18,21 +18,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef BICYCL_HPP__
-#define BICYCL_HPP__
+#ifndef HASH_HPP__
+#define HASH_HPP__
 
-#ifndef BICYCL_GMP_PRIMALITY_TESTS_ITERATION
-#define BICYCL_GMP_PRIMALITY_TESTS_ITERATION 30
-#endif
+#include <stdexcept>
+#include <vector>
 
-#include "bicycl/gmp_extras.hpp"
-#include "bicycl/qfi.hpp"
+#include <openssl/evp.h>
+
 #include "bicycl/seclevel.hpp"
-#include "bicycl/hash.hpp"
-#include "bicycl/ec.hpp"
-#include "bicycl/CL_HSMqk.hpp"
-#include "bicycl/CL_HSM2k.hpp"
-#include "bicycl/Paillier.hpp"
-#include "bicycl/Joye_Libert.hpp"
 
-#endif /* BICYCL_HPP__ */
+namespace BICYCL
+{
+  class HashAlgo
+  {
+    protected:
+      const EVP_MD *md_;
+      EVP_MD_CTX *mdctx_;
+
+    public:
+      using Digest = std::vector<unsigned char>;
+
+      /* constructors */
+      HashAlgo (SecLevel seclevel); /* Use SHA3 with desired security level */
+      HashAlgo (int nid);
+
+      /* destructor */
+      ~HashAlgo ();
+
+      /* getters */
+      int digest_size () const;
+
+      template <typename First, typename... Rem>
+      Digest operator() (const First &first, const Rem&... rem);
+
+    protected:
+      template <typename First, typename... Rem>
+      void hash_update (const First & first, const Rem&... rem);
+
+      void hash_update_implem (const void *ptr, size_t n);
+  };
+
+  #include "hash.inl"
+
+} /* BICYCL namespace */
+
+
+#endif /* HASH_HPP__ */
