@@ -290,11 +290,10 @@ Mpz::Mpz (const std::vector<unsigned char> &data, size_t nb_bits) : Mpz()
 {
   /* the binary data is interpreted most significant bit first */
   mpz_import (mpz_, data.size(), 1, 1, 0, 0, data.data());
-  size_t ln2 = nbits();
   if (nb_bits > data.size() * CHAR_BIT)
     throw std::runtime_error ("not enough data to read the number of bits");
   else
-    divby2k (*this, *this, ln2-nb_bits);
+    divby2k (*this, *this, data.size() * CHAR_BIT - nb_bits);
 }
 
 /* */
