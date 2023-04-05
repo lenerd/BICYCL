@@ -36,7 +36,7 @@ void usage (const string &argv0)
             << "  -seclevel <integer> target security level (";
 
   size_t i = 0;
-  for (const BICYCL::SecLevel &v: BICYCL::SecLevel::All())
+  for (const BICYCL::SecLevel v: BICYCL::SecLevel::All())
   {
     if (i > 0 && i+1 < BICYCL::SecLevel::All().size())
       std::cout << ", ";
