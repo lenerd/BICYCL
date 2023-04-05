@@ -21,7 +21,6 @@ Compilation can be done by running the following commands:
     mkdir build
     cd build
     cmake ..
-    make
 
 \note The directory name `build` can be replaced by any name that do not already
 exist. This documentation assumes that the name `build` was used.
@@ -61,6 +60,17 @@ command with sudo for the installation to succeed:
 
     sudo make install
 
+## Examples
+
+Some examples can be found in the `examples` directory of the source tree. To
+compile all the examples, run the following command in the `build` directory:
+
+    make examples
+
+To compile only a specific example (`chia-vdf` in this example), run the
+following command in the `build` directory:
+
+    make chia-vdf
 
 ## Tests
 
