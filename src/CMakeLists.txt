@@ -3,6 +3,10 @@ set (BICYCL_INSTALLABLE_HEADERS_AND_INL
                       ${CMAKE_CURRENT_SOURCE_DIR}/bicycl/seclevel.hpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/bicycl/gmp_extras.hpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/bicycl/gmp_extras.inl
+                      ${CMAKE_CURRENT_SOURCE_DIR}/bicycl/hash.hpp
+                      ${CMAKE_CURRENT_SOURCE_DIR}/bicycl/hash.inl
+                      ${CMAKE_CURRENT_SOURCE_DIR}/bicycl/ec.hpp
+                      ${CMAKE_CURRENT_SOURCE_DIR}/bicycl/ec.inl
                       ${CMAKE_CURRENT_SOURCE_DIR}/bicycl/qfi.hpp
                       ${CMAKE_CURRENT_SOURCE_DIR}/bicycl/qfi.inl
                       ${CMAKE_CURRENT_SOURCE_DIR}/bicycl/CL_HSM_utils.hpp
