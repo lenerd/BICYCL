@@ -105,3 +105,8 @@ add_subdirectory (tests EXCLUDE_FROM_ALL)
 # Benchmarks
 ################################################################################
 add_subdirectory (benchs EXCLUDE_FROM_ALL)
+
+################################################################################
+# Examples
+################################################################################
+add_subdirectory (examples EXCLUDE_FROM_ALL)
