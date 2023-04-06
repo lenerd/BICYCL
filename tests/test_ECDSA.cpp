@@ -29,7 +29,7 @@ using std::string;
 using namespace BICYCL;
 
 /******************************************************************************/
-bool check (RandGen &randgen, SecLevel seclevel, size_t niter)
+bool check (SecLevel seclevel, size_t niter)
 {
   bool success = true;
 
@@ -38,7 +38,7 @@ bool check (RandGen &randgen, SecLevel seclevel, size_t niter)
 
   ECDSA C (seclevel);
   desc << " ECDSA";
-  success &= Test::test_sign (C, randgen, niter, desc.str());
+  success &= Test::test_sign (C, niter, desc.str());
 
   return success;
 }
@@ -52,10 +52,12 @@ main (int argc, char *argv[])
   RandGen randgen;
   randseed_from_argv (randgen, argc, argv);
 
-  success &= check (randgen, SecLevel::_112, 50);
-  success &= check (randgen, SecLevel::_128, 50);
-  success &= check (randgen, SecLevel::_192, 50);
-  success &= check (randgen, SecLevel::_256, 50);
+  Test::OverrideOpenSSLRand::WithRandGen tmp_override (randgen);
+
+  success &= check (SecLevel::_112, 50);
+  success &= check (SecLevel::_128, 50);
+  success &= check (SecLevel::_192, 50);
+  success &= check (SecLevel::_256, 50);
 
   return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }

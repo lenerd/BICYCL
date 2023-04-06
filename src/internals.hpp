@@ -27,6 +27,10 @@
 #include <chrono>
 #include <stdexcept>
 
+#include <openssl/rand.h>
+
+#include "bicycl/gmp_extras.hpp"
+
 namespace BICYCL
 {
   /*
@@ -114,7 +118,7 @@ namespace BICYCL
 
     /* */
     template <class Cryptosystem>
-    bool test_sign (const Cryptosystem &C, RandGen &randgen, size_t niter,
+    bool test_sign (const Cryptosystem &C, size_t niter,
                     const std::string & pre = std::string(""))
     {
       using PublicKey = typename Cryptosystem::PublicKey;
@@ -124,18 +128,19 @@ namespace BICYCL
 
       bool ret = true;
 
-      SecretKey sk = C.keygen (randgen);
+      SecretKey sk = C.keygen ();
       PublicKey pk = C.keygen (sk);
 
       Message m;
-      auto random_uchar = [&randgen](){ return randgen.random_uchar(); };
 
       /* Test niter random sign + verif */
       for (size_t i = 0; i < niter; i++)
       {
-        m.resize (randgen.random_ui_2exp (8));
-        std::generate (begin(m), end(m), random_uchar);
-        Signature s = C.sign (sk, m, randgen);
+        unsigned char size;
+        RAND_bytes (&size, 1 * sizeof (unsigned char));
+        m.resize (size);
+        RAND_bytes (m.data(), m.size() * sizeof (unsigned char));
+        Signature s = C.sign (sk, m);
         ret &= C.verif (s, pk, m);
       }
 
@@ -189,6 +194,52 @@ namespace BICYCL
       Test::result_line (pre + " ciphertext ops", ret);
       return ret;
     }
+
+    namespace OverrideOpenSSLRand
+    {
+      static RandGen *randgen_ = NULL;
+
+      class WithRandGen
+      {
+        protected:
+          RAND_METHOD m_;
+
+          static int bytes (unsigned char *buf, int num)
+          {
+            if (randgen_ == NULL)
+              return 0;
+            else
+            {
+              for (int i = 0; i < num; i++)
+                buf[i] = randgen_->random_uchar();
+              return 1;
+            }
+          }
+
+          static int status ()
+          {
+            return randgen_ != NULL ? 1 : 0;
+          }
+
+        public:
+          WithRandGen (RandGen &randgen) : m_ ({ .seed = NULL, .bytes = &bytes,
+                                                 .cleanup = NULL, .add = NULL,
+                                                 .pseudorand = NULL,
+                                                 .status = &status})
+          {
+            randgen_ = &randgen;
+            int ret = RAND_set_rand_method (&m_);
+            if (ret != 1)
+              throw std::runtime_error ("Could set OpenSSL RAND method");
+          }
+
+          ~WithRandGen ()
+          {
+            randgen_ = NULL;
+            RAND_set_rand_method (RAND_OpenSSL());
+          }
+      };
+    } /* OverrideOpenSSLRand namespace */
   } /* BICYCL::Test namespace */
 
   /****************************************************************************/

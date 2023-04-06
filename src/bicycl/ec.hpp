@@ -69,7 +69,7 @@ namespace BICYCL
 
         public:
           /* constructors */
-          SecretKey (const ECDSA &, RandGen &);
+          SecretKey (const ECDSA &);
 
           /* destructor */
           ~SecretKey ();
@@ -104,8 +104,7 @@ namespace BICYCL
 
         public:
           /* constructors */
-          Signature (const ECDSA &C, const SecretKey &sk, const Message &m,
-                                                              RandGen &randgen);
+          Signature (const ECDSA &C, const SecretKey &sk, const Message &m);
 
           /* getters */
           const Mpz & r () const;
@@ -119,10 +118,10 @@ namespace BICYCL
       const Mpz & order () const;
 
       /* crypto protocol */
-      SecretKey keygen (RandGen &randgen) const;
+      SecretKey keygen () const;
       PublicKey keygen (const SecretKey &sk) const;
       Mpz hash_message (const Message &m) const;
-      Signature sign (const SecretKey &sk, const Message &m, RandGen &) const;
+      Signature sign (const SecretKey &sk, const Message &m) const;
       bool verif (const Signature &s, const PublicKey &pk, const Message &m) const;
   }; /* ECDSA */
 

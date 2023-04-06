@@ -79,14 +79,14 @@ const Mpz & ECDSA::order () const
 
 /* */
 inline
-ECDSA::SecretKey ECDSA::keygen (RandGen &randgen) const
+ECDSA::SecretKey ECDSA::keygen () const
 {
-  return SecretKey (*this, randgen);
+  return SecretKey (*this);
 }
 
 /* */
 inline
-ECDSA::SecretKey::SecretKey (const ECDSA &C, RandGen &randgen)
+ECDSA::SecretKey::SecretKey (const ECDSA &C)
 {
   const EC_GROUP *ec = C.ec_.group();
   int ret;
@@ -99,26 +99,8 @@ ECDSA::SecretKey::SecretKey (const ECDSA &C, RandGen &randgen)
   if (ret != 1)
     throw std::runtime_error ("could not associate SecretKey with ECDSA group");
 
-  sk_ = (randgen.random_mpz (C.ec_.order()));
-
-  BIGNUM *s = static_cast<BIGNUM *>(sk_);
-
-  ret = EC_KEY_set_private_key (key_, s);
-  if (ret != 1)
-    throw std::runtime_error ("could not set private key of EC_KEY");
-
-  EC_POINT *P = EC_POINT_new (ec);
-  if (key_ == NULL)
-    throw std::runtime_error ("could not allocate temporary EC_POINT");
-  ret = EC_POINT_mul (ec, P, s, NULL, NULL, NULL);
-  if (ret != 1)
-    throw std::runtime_error ("could not compute public key from private key");
-  EC_KEY_set_public_key (key_, P);
-  if (ret != 1)
-    throw std::runtime_error ("could not set public key of EC_KEY");
-
-  EC_POINT_free (P);
-  BN_free (s);
+  EC_KEY_generate_key (key_);
+  sk_ = EC_KEY_get0_private_key (key_);
 }
 
 /* */
@@ -171,23 +153,22 @@ Mpz ECDSA::hash_message (const Message &m) const
 
 /* */
 inline
-ECDSA::Signature ECDSA::sign (const SecretKey &sk, const Message &m,
-                                                   RandGen &randgen) const
+ECDSA::Signature ECDSA::sign (const SecretKey &sk, const Message &m) const
 {
-  return Signature (*this, sk, m, randgen);
+  return Signature (*this, sk, m);
 }
 
 /* */
 inline
 ECDSA::Signature::Signature (const ECDSA &C, const SecretKey &sk,
-                                             const Message &m, RandGen &randgen)
+                                             const Message &m)
 {
   const Mpz & n = C.order();
   Mpz z = C.hash_message (m);
   Mpz kinv;
   do
   {
-    SecretKey per_message (C, randgen);
+    SecretKey per_message (C);
     const Mpz & k = per_message.get_secret_key();
     if (k.is_zero())
       continue;
