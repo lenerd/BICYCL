@@ -6,14 +6,14 @@ The code source is available at https://gite.lirmm.fr/crypto/bicycl.
 
 ## Build from source
 
-To compile the code, CMake 3.5.1 or later is necessary, and the following
-libraries are required:
+To compile the code, a C++ compiler and CMake 3.5.1 or later are necessary, and
+the following libraries are required:
   - GMP
   - openSSL
 
 \note On Debian and Ubuntu, the necessary files can be installed with
 
-    apt install libgmp-dev libssl-dev cmake
+    apt install g++ libgmp-dev libssl-dev cmake
 
 
 Compilation can be done by running the following commands:

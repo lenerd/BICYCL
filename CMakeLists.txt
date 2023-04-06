@@ -34,6 +34,14 @@ message (STATUS "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VER
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
+##############################################################################
+# Check version of compiler
+##############################################################################
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "6.1")
+    message (FATAL_ERROR "${CMAKE_PROJECT_NAME} requires g++ version >= 6.1")
+  endif()
+endif ()
 
 ##############################################################################
 # Options for shared or static library
