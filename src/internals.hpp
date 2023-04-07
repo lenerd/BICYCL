@@ -27,8 +27,6 @@
 #include <chrono>
 #include <stdexcept>
 
-#include <openssl/rand.h>
-
 #include "bicycl/gmp_extras.hpp"
 
 namespace BICYCL
@@ -128,20 +126,21 @@ namespace BICYCL
 
       bool ret = true;
 
-      SecretKey sk = C.keygen ();
-      PublicKey pk = C.keygen (sk);
-
-      Message m;
-
       /* Test niter random sign + verif */
       for (size_t i = 0; i < niter; i++)
       {
-        unsigned char size;
-        RAND_bytes (&size, 1 * sizeof (unsigned char));
-        m.resize (size);
-        RAND_bytes (m.data(), m.size() * sizeof (unsigned char));
+        const Message &m = C.random_message();
+        SecretKey sk = C.keygen ();
+        PublicKey pk = C.keygen (sk);
+
         Signature s = C.sign (sk, m);
         ret &= C.verif (s, pk, m);
+
+        const Message &m_false = C.random_message();
+        SecretKey sk_false = C.keygen ();
+        PublicKey pk_false = C.keygen (sk_false);
+        ret &= !C.verif (s, pk_false, m); /* must fail with another key */
+        ret &= !C.verif (s, pk, m_false); /* must fail with another message */
       }
 
       Test::result_line (pre + " sign/verif", ret);

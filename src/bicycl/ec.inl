@@ -30,17 +30,7 @@ ECGroup::ECGroup (SecLevel seclevel)
   if (ec_group_ == NULL)
     throw std::runtime_error ("could not allocate elliptic curve");
 
-  BIGNUM *tmp = BN_new();
-  if (tmp == NULL)
-    throw std::runtime_error ("could not allocate OpenSSL BIGNUM");
-
-  int ret = EC_GROUP_get_order (ec_group_, tmp, NULL);
-  if (!ret)
-    throw std::runtime_error ("EC_GROUP_get_order failed");
-
-  order_ = tmp;
-
-  BN_free (tmp);
+  order_ = EC_GROUP_get0_order (ec_group_);
 }
 
 /* */
@@ -62,6 +52,36 @@ inline
 const EC_GROUP * ECGroup::group () const
 {
   return ec_group_;
+}
+
+/* We assume that the order is prime (which must be the case for NIST curves) */
+inline
+bool ECGroup::is_generator (const EC_POINT *G) const
+{
+  if (EC_POINT_is_at_infinity (ec_group_, G))
+    return false;
+
+  if (!EC_POINT_is_on_curve (ec_group_, G, NULL))
+    return false;
+
+  EC_POINT *T = EC_POINT_new (ec_group_);
+  if (T == NULL)
+    throw std::runtime_error ("could not allocate EC_POINT in is_generator");
+
+  scal_mul_by_order (T, G);
+  bool is_gen = EC_POINT_is_at_infinity (ec_group_, T);
+  EC_POINT_free (T);
+  return is_gen;
+}
+
+/* */
+inline
+void ECGroup::scal_mul_by_order (EC_POINT *R, const EC_POINT *P) const
+{
+  const BIGNUM *n = EC_GROUP_get0_order (ec_group_);
+  int ret = EC_POINT_mul (ec_group_, R, NULL, P, n, NULL);
+  if (ret != 1)
+    throw std::runtime_error ("EC_POINT_mul failed in scal_mul_by_order");
 }
 
 /******************************************************************************/
@@ -214,61 +234,63 @@ bool ECDSA::verif (const Signature &s, const PublicKey &pk,
   const EC_POINT *Q = pk.ec_point();
   const Mpz & n = order();
 
+  if (!ec_.is_generator (Q)) /* check that Q as order n */
+    return false;
+
+  if (s.r() < 1UL || s.r() >= n || s.s() < 1UL || s.s() >= n)
+    return false;
+
   bool ok = true;
-
-  if (EC_POINT_is_at_infinity (ec, Q))
-    return false;
-
-  if (!EC_POINT_is_on_curve (ec, Q, NULL))
-    return false;
-
-  BIGNUM *bn_order = n;
   EC_POINT *T = EC_POINT_new (ec);
+  Mpz z = hash_message (m);
+  Mpz u1, u2, sinv;
+  Mpz::mod_inverse (sinv, s.s(), n);
+  Mpz::mul (u1, sinv, z);
+  Mpz::mod (u1, u1, n);
+  Mpz::mul (u2, sinv, s.r());
+  Mpz::mod (u2, u2, n);
 
-  int ret = EC_POINT_mul (ec, T, NULL, Q, bn_order, NULL);
-  if (ret != 1 || !EC_POINT_is_at_infinity (ec, T))
+  BIGNUM *bn_u1 = u1;
+  BIGNUM *bn_u2 = u2;
+
+  int ret = EC_POINT_mul (ec, T, bn_u1, Q, bn_u2, NULL);
+  if (ret != 1)
+    throw std::runtime_error ("EC_POINT_mul failed in verif");
+
+  if (EC_POINT_is_at_infinity (ec, T))
     ok = false;
   else
   {
-    if (s.r() < 1UL || s.r() >= n || s.s() < 1UL || s.s() >= n)
-      ok = false;
-    {
-      Mpz z = hash_message (m);
-      Mpz u1, u2, sinv;
-      Mpz::mod_inverse (sinv, s.s(), n);
-      Mpz::mul (u1, sinv, z);
-      Mpz::mod (u1, u1, n);
-      Mpz::mul (u2, sinv, s.r());
-      Mpz::mod (u2, u2, n);
+    BIGNUM *bn_x1 = BN_new();
+    ret = EC_POINT_get_affine_coordinates (ec, T, bn_x1, NULL, NULL);
+    if (ret != 1)
+      throw std::runtime_error ("Could not get x coordinates in verif");
+    Mpz x1;
+    x1 = bn_x1;
+    Mpz::mod (x1, x1, n);
 
-      BIGNUM *bn_u1 = u1;
-      BIGNUM *bn_u2 = u2;
+    ok = (x1 == s.r());
 
-      ret = EC_POINT_mul (ec, T, bn_u1, Q, bn_u2, NULL);
-      if (ret != 1 || EC_POINT_is_at_infinity (ec, T))
-        ok = false;
-      else
-      {
-        BIGNUM *bn_x1 = BN_new();
-        EC_POINT_get_affine_coordinates (ec, T, bn_x1, NULL, NULL);
-        Mpz x1;
-        x1 = bn_x1;
-        Mpz::mod (x1, x1, n);
-
-        ok = (x1 == s.r());
-
-        BN_free (bn_x1);
-      }
-
-      BN_free (bn_u1);
-      BN_free (bn_u2);
-    }
+    BN_free (bn_x1);
   }
 
-  BN_free (bn_order);
+  BN_free (bn_u1);
+  BN_free (bn_u2);
   EC_POINT_free (T);
 
   return ok;
+}
+
+/* random message of random length between 4 and UCHAR_MAX */
+inline
+ECDSA::Message ECDSA::random_message () const
+{
+  unsigned char size;
+  RAND_bytes (&size, 1 * sizeof (unsigned char));
+  size = (size < 4) ? 4 : size;
+  Message m (size);
+  RAND_bytes (m.data(), m.size() * sizeof (unsigned char));
+  return m;
 }
 
 #endif /* EC_INL__ */

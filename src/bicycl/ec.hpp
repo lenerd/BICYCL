@@ -26,6 +26,7 @@
 #include <openssl/bn.h>
 #include <openssl/ec.h>
 #include <openssl/evp.h> /* for SHA3 */
+#include <openssl/rand.h>
 
 #include "bicycl/seclevel.hpp"
 #include "bicycl/gmp_extras.hpp"
@@ -50,8 +51,14 @@ namespace BICYCL
       const Mpz & order () const;
       const EC_GROUP * group () const;
 
-  }; /* ECGroup */
+      /* */
+      bool is_generator (const EC_POINT *G) const;
 
+    protected:
+      /* utils */
+      void scal_mul_by_order (EC_POINT *R, const EC_POINT *P) const;
+
+  }; /* ECGroup */
 
   class ECDSA
   {
@@ -123,6 +130,9 @@ namespace BICYCL
       Mpz hash_message (const Message &m) const;
       Signature sign (const SecretKey &sk, const Message &m) const;
       bool verif (const Signature &s, const PublicKey &pk, const Message &m) const;
+
+      /* utils */
+      Message random_message () const;
   }; /* ECDSA */
 
   #include "ec.inl"
