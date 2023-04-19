@@ -28,6 +28,31 @@ using std::string;
 
 using namespace BICYCL;
 
+/* */
+bool
+test_ECNIZK (SecLevel seclevel, size_t niter)
+{
+  std::stringstream pre;
+  pre << "security " << seclevel << " bits ECNIZK";
+
+  bool ret = true;
+
+  for (size_t i = 0; i < niter; i++)
+  {
+    ECNIZK zk (seclevel);
+
+    ECNIZK::SecretValue s (zk);
+    ECNIZK::PublicValue Q = zk.public_value_from_secret (s);
+
+    ECNIZK::Proof proof = zk.noninteractive_proof (s);
+
+    ret &= zk.noninteractive_verify (Q, proof);
+  }
+
+  Test::result_line (pre.str(), ret);
+  return ret;
+}
+
 /******************************************************************************/
 bool check (SecLevel seclevel, size_t niter)
 {
@@ -39,6 +64,8 @@ bool check (SecLevel seclevel, size_t niter)
   ECDSA C (seclevel);
   desc << " ECDSA";
   success &= Test::test_sign (C, niter, desc.str());
+
+  success &= test_ECNIZK (seclevel, niter);
 
   return success;
 }

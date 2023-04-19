@@ -33,12 +33,82 @@
 
 namespace BICYCL
 {
+  /*****/
+  class BN
+  {
+    protected:
+      BIGNUM *bn_;
 
+    public:
+      BN ();
+      ~BN ();
+
+      /* */
+      BN & operator= (const HashAlgo::Digest &digest);
+      bool operator== (const BN &other) const;
+      bool is_zero () const;
+
+    friend class ECGroup;
+    friend class ECDSA;
+    friend class ECNIZK;
+    friend HashAlgo;
+
+    protected:
+      operator BIGNUM *() const;
+  }; /* BN */
+
+  /*****/
+  template <typename Cryptosystem>
+  class ECPoint
+  {
+    protected:
+      EC_POINT *P_;
+
+    public:
+      ECPoint (const Cryptosystem &C);
+      ECPoint (const Cryptosystem &C, const EC_POINT *Q);
+      ~ECPoint ();
+
+      ECPoint & operator= (const EC_POINT *Q);
+
+      friend Cryptosystem;
+
+    protected:
+      operator EC_POINT *() const;
+  }; /* ECPoint */
+
+
+  /*****/
+  template <typename Cryptosystem>
+  class ECKey
+  {
+    protected:
+      EC_KEY *key_;
+
+    public:
+      /* constructors */
+      ECKey (const Cryptosystem &);
+
+      /* destructor */
+      ~ECKey ();
+
+      friend Cryptosystem;
+
+    protected:
+      /* conversion */
+      operator const BIGNUM *() const;
+
+      /* getters */
+      const EC_POINT * get_ec_point () const;
+  }; /* ECKey */
+
+  /****/
   class ECGroup
   {
     protected:
       EC_GROUP *ec_group_;
       Mpz order_;
+      BN_CTX *ctx_;
 
     public:
       /* constructors */
@@ -49,91 +119,115 @@ namespace BICYCL
 
       /* getters */
       const Mpz & order () const;
-      const EC_GROUP * group () const;
 
-      /* */
-      bool is_generator (const EC_POINT *G) const;
+      /* Wrapper to easily create EC_POINT * and EC_KEY *.
+       * Return values must be freed using EC_POINT_free or EC_KEY_free.
+       */
+      EC_POINT * new_ec_point () const;
+      EC_POINT * new_ec_point_copy (const EC_POINT *P) const;
+      EC_KEY * new_ec_key () const;
 
     protected:
       /* utils */
-      void scal_mul_by_order (EC_POINT *R, const EC_POINT *P) const;
+      const EC_POINT * gen () const;
+      bool has_correct_order (const EC_POINT *G) const;
+
+      /* arithmetic operations modulo the group order */
+      void mod_order (BIGNUM *r, const BIGNUM *a) const;
+      void add_mod_order (BIGNUM *r, const BIGNUM *a, const BIGNUM *b) const;
+      void mul_mod_order (BIGNUM *r, const BIGNUM *a, const BIGNUM *b) const;
+      void inverse_mod_order (BIGNUM *r, const BIGNUM *a) const;
+      bool is_positive_less_than_order (const BIGNUM *v) const;
+
+      /* elliptic operations */
+      bool ec_point_eq (const EC_POINT *P, const EC_POINT *Q) const;
+      void get_coords_of_point (BIGNUM *x, BIGNUM *y, const EC_POINT *P) const;
+      void get_x_coord_of_point (BIGNUM *x, const EC_POINT *P) const;
+      void ec_add (EC_POINT *R, const EC_POINT *P, const EC_POINT *Q) const;
+      void scal_mul_gen (EC_POINT *R, const BIGNUM *n) const;
+      void scal_mul (EC_POINT *R, const BIGNUM *n, const EC_POINT *P) const;
 
   }; /* ECGroup */
 
-  class ECDSA
+  /*****/
+  class ECDSA : public ECGroup
   {
     protected:
-      ECGroup ec_;
       mutable HashAlgo H_;
 
     public:
-      /*** Secret Key ***/
-      class SecretKey
-      {
-        protected:
-          EC_KEY *key_;
-          Mpz sk_;
-
-        public:
-          /* constructors */
-          SecretKey (const ECDSA &);
-
-          /* destructor */
-          ~SecretKey ();
-
-          /* getters */
-          const EC_POINT * get_public_key () const;
-          const Mpz & get_secret_key () const;
-      };
-
-      /*** Public Key ***/
-      class PublicKey
-      {
-        protected:
-          const EC_POINT * pk_;
-
-        public:
-          /* constructors */
-          PublicKey (const SecretKey &);
-
-          /* getters */
-          const EC_POINT * ec_point () const;
-      };
-
-      /*** Message ***/
+      using SecretKey = ECKey<ECDSA>;
+      using PublicKey = ECPoint<ECDSA>;
       using Message = std::vector<unsigned char>;
 
       /*** Signature ***/
       class Signature
       {
         protected:
-          Mpz r_, s_;
+          BN r_, s_;
 
         public:
           /* constructors */
           Signature (const ECDSA &C, const SecretKey &sk, const Message &m);
 
-          /* getters */
-          const Mpz & r () const;
-          const Mpz & s () const;
+          friend ECDSA;
       };
 
       /* constructors */
       ECDSA (SecLevel seclevel);
 
-      /* getters */
-      const Mpz & order () const;
-
       /* crypto protocol */
       SecretKey keygen () const;
       PublicKey keygen (const SecretKey &sk) const;
-      Mpz hash_message (const Message &m) const;
       Signature sign (const SecretKey &sk, const Message &m) const;
       bool verif (const Signature &s, const PublicKey &pk, const Message &m) const;
 
       /* utils */
       Message random_message () const;
+
+    protected:
+      void hash_message (BN &h, const Message &m) const;
   }; /* ECDSA */
+
+  /*****/
+  class ECNIZK : public ECGroup
+  {
+    protected:
+      mutable HashAlgo H_;
+
+    public:
+      using SecretValue = ECKey<ECNIZK>;
+      using PublicValue = ECPoint<ECNIZK>;
+
+      class Proof
+      {
+        protected:
+          ECPoint<ECNIZK> R_;
+          BN c_;
+          BN z_;
+
+        public:
+          Proof (const ECNIZK &C, const SecretValue &s);
+
+          bool verify (const ECNIZK &C, const PublicValue &Q) const;
+      };
+
+      /* constructors */
+      ECNIZK (SecLevel seclevel);
+
+      PublicValue public_value_from_secret (const SecretValue &s) const;
+
+      /* crypto protocol */
+      Proof noninteractive_proof (const SecretValue &s) const;
+      bool noninteractive_verify (const PublicValue &Q,
+                                  const Proof &proof) const;
+
+    protected:
+      /* utils */
+      void hash_for_challenge (BN &c, const EC_POINT *R,
+                                              const EC_POINT *Q) const;
+
+  }; /* ECNIZK */
 
   #include "ec.inl"
 
