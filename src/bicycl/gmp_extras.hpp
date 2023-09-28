@@ -94,6 +94,9 @@ namespace BICYCL
       Mpz (long);
       Mpz (const std::string &);
       Mpz (const std::vector<unsigned char> &, size_t);
+      /* Create Mpz instance by wrapping an existing and initialized GMP mpz_t.
+       * The Mpz instance takes ownership of the mpz_t. */
+      Mpz (mpz_t);
 
       /* destructor */
       ~Mpz ();
@@ -128,6 +131,9 @@ namespace BICYCL
       bool operator>= (long) const;
 
       /* conversion */
+      /* Optain a pointer to the contained mpz_t */
+      operator mpz_ptr();
+      /* Optain a const pointer to the contained mpz_t */
       operator mpz_srcptr() const;
       operator unsigned long int() const;
       operator long int() const;

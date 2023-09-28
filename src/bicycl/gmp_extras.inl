@@ -298,6 +298,12 @@ Mpz::Mpz (const std::vector<unsigned char> &data, size_t nb_bits) : Mpz()
 
 /* */
 inline
+Mpz::Mpz (mpz_t v) {
+  mpz_swap(v, mpz_);
+}
+
+/* */
+inline
 Mpz::~Mpz ()
 {
   mpz_clear (mpz_);
@@ -503,6 +509,13 @@ inline
 bool Mpz::operator>= (long v) const
 {
   return richcmp (*this, v) >= 0;
+}
+
+/* */
+inline
+Mpz::operator mpz_ptr()
+{
+  return mpz_;
 }
 
 /* */
