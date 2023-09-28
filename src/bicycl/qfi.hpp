@@ -148,6 +148,8 @@ namespace BICYCL
       const bool is_neg;
 
       QFICompressedRepresentation () = delete;
+      QFICompressedRepresentation (const QFICompressedRepresentation & other) = default;
+      QFICompressedRepresentation (QFICompressedRepresentation && other) = default;
       QFICompressedRepresentation (const Mpz &, const Mpz &, const Mpz &,
                                    const Mpz &, bool);
 
