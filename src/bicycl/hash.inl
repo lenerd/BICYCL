@@ -92,6 +92,7 @@ void HashAlgo::hash_update_implem (const void *ptr, size_t n)
 
 /* */
 template <>
+inline
 void HashAlgo::hash_update (const std::vector<unsigned char> &m)
 {
   hash_update_implem (m.data(), m.size() * sizeof(unsigned char));

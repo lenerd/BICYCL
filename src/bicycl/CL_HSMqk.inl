@@ -890,6 +890,7 @@ CL_HSMqk::Genus CL_HSMqk::genus (const QFI &f) const
 
 /* */
 template <>
+inline
 void HashAlgo::hash_update (const CL_HSMqk::PublicKey &pk)
 {
   hash_update (pk.elt());
@@ -897,6 +898,7 @@ void HashAlgo::hash_update (const CL_HSMqk::PublicKey &pk)
 
 /* */
 template <>
+inline
 void HashAlgo::hash_update (const CL_HSMqk::CipherText &c)
 {
   hash_update (c.c1());
@@ -967,6 +969,7 @@ bool CL_HSMqk_ZKAoK::noninteractive_verify (const PublicKey &pk,
 }
 
 /* */
+inline
 CL_HSMqk_ZKAoK::Proof::Proof (const CL_HSMqk_ZKAoK &C, const PublicKey &pk,
                               const CipherText &c, const ClearText &a,
                               const Mpz &r, RandGen &randgen)
@@ -991,6 +994,7 @@ CL_HSMqk_ZKAoK::Proof::Proof (const CL_HSMqk_ZKAoK &C, const PublicKey &pk,
 }
 
 /* */
+inline
 bool CL_HSMqk_ZKAoK::Proof::verify (const CL_HSMqk_ZKAoK &C,
                                     const PublicKey &pk,
                                     const CipherText &c) const

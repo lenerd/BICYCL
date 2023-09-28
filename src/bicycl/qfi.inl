@@ -1180,6 +1180,7 @@ void QFI::nupow (QFI &r, const QFI &f0, const Mpz &n0,
  * Assumes: f0 and f1 have the same discriminant
  *          n0 and n1 are positive
  */
+inline
 void QFI::nupow (QFI &r, const QFI &f, const Mpz &n, size_t d, size_t e,
                  const QFI &fe, const QFI &fd, const QFI &fed, const Mpz &L)
 {
@@ -1275,6 +1276,7 @@ void QFI::nupow (QFI &r, const QFI &f, const Mpz &n, size_t d, size_t e,
 
 /* */
 template <>
+inline
 void HashAlgo::hash_update (const QFI &f)
 {
   hash_update (f.a());

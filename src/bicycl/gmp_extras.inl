@@ -1415,12 +1415,14 @@ void Mpz::partial_euclid (Mpz &u00, Mpz &u01, Mpz &u10, Mpz &u11, Mpz &a,
 }
 
 /* */
+inline
 std::ostream & operator<< (std::ostream &o, const Mpz &v)
 {
   return o << v.mpz_;
 }
 
 /* */
+inline
 std::istream & operator>> (std::istream &i, Mpz &v)
 {
   return i >> v.mpz_;
@@ -1449,6 +1451,7 @@ int Mpz::richcmp (const Mpz &a, long v)
 
 /* */
 template <>
+inline
 void HashAlgo::hash_update (const Mpz &v)
 {
   hash_update_implem (mpz_limbs_read (v), mpz_size (v) * sizeof (mp_limb_t));
