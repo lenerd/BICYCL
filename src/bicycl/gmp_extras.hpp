@@ -256,18 +256,18 @@ namespace BICYCL
 
       void set_seed (const Mpz &);
 
-      Mpz random_mpz (const Mpz &);
-      Mpz random_mpz_2exp (mp_bitcnt_t);
+      virtual Mpz random_mpz (const Mpz &);
+      virtual Mpz random_mpz_2exp (mp_bitcnt_t);
 
-      unsigned char random_uchar ();
-      unsigned long random_ui (unsigned long);
-      unsigned long random_ui_2exp (mp_bitcnt_t);
+      virtual unsigned char random_uchar ();
+      virtual unsigned long random_ui (unsigned long);
+      virtual unsigned long random_ui_2exp (mp_bitcnt_t);
 
-      Mpz random_negative_discriminant (mp_bitcnt_t);
+      virtual Mpz random_negative_discriminant (mp_bitcnt_t);
 
-      bool random_bool ();
+      virtual bool random_bool ();
 
-      Mpz random_prime (mp_bitcnt_t);
+      virtual Mpz random_prime (mp_bitcnt_t);
   }; /* RandGen */
 
 
