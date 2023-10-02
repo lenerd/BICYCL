@@ -289,6 +289,40 @@ const ClassGroup & CL_HSMqk::Cl_G () const
 
 /* */
 inline
+bool CL_HSMqk::in_Cl_DeltaSq (const QFI &v) const
+{
+  // Check that v has the right discriminant and is a square
+  return (v.discriminant() == Cl_Delta_.discriminant())
+      && (genus(v) == Genus ({ 1, 1 }));
+}
+
+/* */
+inline
+bool CL_HSMqk::in_Cl_DeltaKSq (const QFI &v) const
+{
+  // Check that v has the right discriminant and is a square
+  return (v.discriminant() == Cl_DeltaK_.discriminant())
+      && (genus(v) == Genus ({ 1, 1 }));
+}
+
+/* */
+inline
+bool CL_HSMqk::in_GSq (const QFI &v) const
+{
+  return compact_variant_ ? in_Cl_DeltaKSq(v) : in_Cl_DeltaSq(v);
+}
+
+/* */
+inline
+bool CL_HSMqk::in_F (const QFI &v) const
+{
+  QFI tmp = v;
+  raise_to_power_M (Cl_Delta_, tmp);
+  return tmp.is_one();
+}
+
+/* */
+inline
 const Mpz & CL_HSMqk::DeltaK () const
 {
   return Cl_DeltaK_.discriminant();
@@ -1002,16 +1036,13 @@ bool CL_HSMqk_ZKAoK::Proof::verify (const CL_HSMqk_ZKAoK &C,
   bool ret = true;
 
   /* Check that pk is a form in G */
-  ret &= pk.elt().discriminant() == C.Cl_G().discriminant();
-  ret &= C.genus (pk.elt()) == CL_HSMqk::Genus ({ 1, 1 });
+  ret &= C.in_GSq(pk.elt());
 
   /* Check that c1 is a form in G */
-  ret &= c.c1().discriminant() == C.Cl_G().discriminant();
-  ret &= C.genus (c.c1()) == CL_HSMqk::Genus ({ 1, 1 });
+  ret &= C.in_GSq(c.c1());
 
   /* Check that c2 */
-  ret &= c.c2().discriminant() == C.Cl_Delta().discriminant();
-  ret &= C.genus (c.c2()) == CL_HSMqk::Genus ({ 1, 1 });
+  ret &= C.in_Cl_DeltaSq(c.c2());
 
   /* Check u1 bound */
   Mpz B (C.bound_extra_);

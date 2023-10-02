@@ -191,6 +191,14 @@ namespace BICYCL
        */
       const ClassGroup & Cl_Delta () const;
       const ClassGroup & Cl_G () const;
+      /** Return whether a quadratic form is in \f$\ClDelta^2\f$ */
+      bool in_Cl_DeltaSq (const QFI&) const;
+      /** Return whether a quadratic form is in \f$\ClDeltaK^2\f$ */
+      bool in_Cl_DeltaKSq (const QFI&) const;
+      /** Return whether a quadratic form is in \f$G^2\f$ */
+      bool in_GSq (const QFI&) const;
+      /** Return whether a quadratic form is in \f$F\f$ */
+      bool in_F (const QFI&) const;
       /** Return \f$h\f$, the generator of the cyclic subgroup \f$H\f$ */
       const QFI & h () const;
       /** Return whether the compact variant is used or not */
